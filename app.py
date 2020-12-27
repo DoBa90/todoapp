@@ -23,8 +23,8 @@ def create_todo():
   body = {}
   try:
     description = request.get_json()['description']
-    todo = todo(description=description)
-    db.session.add(todo)
+    todoInput = todo(description=description)
+    db.session.add(todoInput)
     db.session.commit()
     body['description'] = todo.description
   except:
