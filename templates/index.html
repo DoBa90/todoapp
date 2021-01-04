@@ -51,23 +51,7 @@
             })
         }
 
-        // const deleteBtns = document.querySelectorAll('.delete-button');
-        // for (let i = 0; i < deleteBtns.length; i++) {
-        //     const btn = deleteBtns[i];
-        //     btn.onclick = function(e) {
-        //     const todoId = e.target.dataset['id'];
-        //     fetch('/todos/' + todoId, {
-        //         method: 'DELETE'
-        //     })
-        //     .then(function() {
-        //         const item = e.target.parentElement;
-        //         item.remove();
-        //     })
-        //     }
-        // }
-
         const checkboxes = document.querySelectorAll('.task-completed');
-        console.log(checkboxes);
         for (let i = 0; i < checkboxes.length; i++) {
             const checkbox = checkboxes[i]
             checkbox.onchange = function(e){
