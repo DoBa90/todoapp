@@ -23,26 +23,77 @@
           cursor: pointer;
           font-size: 20px;
         }
+
+        .todoapp {
+          display: flex;
+        }
+
+        .list-wrapper{
+          display: flex;
+          flex-direction: column;
+          margin-top: 15px;
+        }
+
+        .list-wrapper__list{
+          margin-bottom: 10px;
+        }
+
+        .headline {
+          width: 100%;
+        }
+
     </style>
   </head>
   <body>
     <div id="error" class="hidden">Something went wrong!</div>
-    <form id="formElement" method="POST" action="/todos/create">
-      <input type="text" id="description" name="description" />
-      <input type="submit" value="Create" />
-    </form>
-    <ul id="todos">
-      {% for d in data %}
-      <li>
-        <input type="checkbox" data-id="{{ d.id }}" class="task-completed" {% if d.completed %} checked {% endif %}>
-        {{ d.description }}
-        <button class="delete-button" onclick="deleteItem(this, '{{d.id}}')" data-id="{{ d.id }}">&cross;</button>
-      </li>
-      {% endfor %}
-    </ul>
+    <div class="todoapp">
+      <div>
+        <h2 class="headline"> TodoLists </h2>
+        <ul class="list-wrapper">
+          {% for list in list_todos %}
+          <li>
+            <!-- <input type="checkbox" onchange="checkbox(this, '{{list.id}}')"/> -->
+            <a class=list-wrapper__list href="/lists/{{ list.id }}"> {{ list.name }} </a>
+            <!-- <button class="delete-button">&cross;</button> -->
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2 class="headline"> {{active_list.name}} </h2>
+        <form id="formElement" method="POST" action="/todos/create">
+          <input type="text" id="description" name="description" />
+          <input type="submit" value="Create" />
+        </form>
+        <ul id="todos">
+          {% for todo in todos %}
+          <li class="todoList">
+            <input type="checkbox" data-id="{{ todo.id }}" class="task-completed" {% if todo.completed %} checked {% endif %}>
+            {{ todo.description }}
+            <button class="delete-button" onclick="deleteItem(this, '{{todo.id}}')" data-id="{{ todo.id }}">&cross;</button>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
     <script>
+        // function checkbox(el, listId) {
+        //   if(el.checked){
+        //   fetch('/todos/' + listId + '/update', {
+        //             method: 'DELETE',
+        //     })
+        //     .then(function() {
+        //         const elements = document.getElementsByClassName(`todoList${listId}`);
+        //         const length = elements.length;
+        //         for(let i=0; i < length; i++){
+        //           elements[0].remove();
+        //         }
+        //         el.parentElement.remove();
+        //     })
+        //   }
+        // }
+
         function deleteItem(el, id) {
-            console.log(id)
             fetch('/todos/' + id + '/delete-item', {
                     method: 'DELETE'
             })
@@ -61,6 +112,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         'completed': newCompleted,
+                        'list_id': document.getElementById('list_id').value
                     }),
                     headers: {
                         'Content-Type': 'application/json',
