@@ -29,6 +29,48 @@ class TodoList(db.Model):
     def __repr__(self):
         return f'<TodoList ID: {self.id}, name: {self.name}, todos: {self.todos}>'
 
+@app.route('/todoList/createList', methods=['POST'])
+def create_todoList():
+  error = False
+  body = {}
+  try:
+    listName = request.get_json()['listName']
+    todoList = TodoList(name=listName)
+    db.session.add(todoList)
+    db.session.commit()
+    body['listName'] = todoList.name
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    abort (400)
+  else:
+    return jsonify(body)
+
+
+@app.route('/todosList/<list_id>/deleteL', methods=['DELETE'])
+def deletetodoList(list_id):
+    error = False
+    try:
+        list = TodoList.query.get(list_id)
+        for todoItem in list.todo:
+            db.session.delete(todoItem)
+        
+        db.session.delete(list)
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+    finally:
+        db.session.close()
+    if error:
+        abort (500)
+    else:
+        jsonify({ 'success': True })
+
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
   error = False
@@ -36,7 +78,7 @@ def create_todo():
   try:
     description = request.get_json()['description']
     list_id = request.get_json()['list_id']
-    todoInput = Todo(description=description, complete=False, list_id=list_id)
+    todoInput = Todo(description=description, completed=False, list_id=list_id)
     db.session.add(todoInput)
     db.session.commit()
     body['id'] = todoInput.id
@@ -80,10 +122,22 @@ def delete_todo(todo_id):
 
 @app.route('/lists/<list_id>')
 def get_lists_todo(list_id):
+    lists = TodoList.query.all()
+    
+    if not lists:
+        todo_list = TodoList(name='My first Todo List')
+        db.session.add(todo_list)
+        db.session.commit()
+
+    todos = Todo.query.filter_by(list_id=list_id).order_by('id').all()
+    active_list = TodoList.query.get(list_id)
+    list_todos = TodoList.query.all()
+
     return render_template('index.html', 
-    todos=Todo.query.filter_by(list_id=list_id).order_by('id').all(),
-    active_list=TodoList.query.get(list_id),
-    list_todos=TodoList.query.all())
+        todos=todos, 
+        active_list=active_list, 
+        list_todos=list_todos
+    )
 
 @app.route('/')
 def index():
